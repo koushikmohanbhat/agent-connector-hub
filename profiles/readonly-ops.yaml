@@ -1,0 +1,21 @@
+# A read-only profile over several systems, plus one tool proxied straight from an upstream MCP server
+# (the ServiceNow MCP server here; Workday, Snowflake or any vendor server works the same way), narrowed to one table.
+name: readonly-ops
+description: Read-only operations view across ServiceNow, Salesforce and SAP.
+allow_writes: false
+tools:
+  - servicenow-itsm:get_incident
+  - salesforce-service:get_case
+  - sap-s4-orders:get_sales_order
+proxy:
+  - name: servicenow-requests
+    url: "${SERVICENOW_MCP_URL:-fake://servicenow-mcp}"
+    system: servicenow
+    auth:
+      identity: "${SERVICENOW_IDENTITY:-fake}"
+    tools:
+      - upstream: get_records
+        as: find_catalog_requests
+        description: "Find service catalog requests with an encoded query, e.g. stage=fulfillment."
+        fixed_args: {table: sc_request, fields: [number, short_description, request_state, stage, requested_for]}
+        writes: false

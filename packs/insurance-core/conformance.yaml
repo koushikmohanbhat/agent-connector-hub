@@ -1,0 +1,30 @@
+calls:
+  - {tool: get_policy, user: {id: cust-001}, args: {policy_number: POL-1001}, expect: {status: ok, equals: {status: active}}}
+  - {tool: get_policy, user: {id: cust-001}, args: {policy_number: POL-2001}, expect: {status: error}}
+  - {tool: get_policy, user: {id: h-1, roles: [claims_handler]}, args: {policy_number: POL-2001}, expect: {status: ok}}
+  - {tool: list_claims, user: {id: cust-001}, args: {policy_number: POL-1001}, expect: {status: ok, keys: [claims]}}
+  - {tool: get_claim_status, user: {id: cust-001}, args: {claim_id: CLM-50001}, expect: {status: ok, equals: {status: settled}}}
+  - tool: open_claim                    # lapsed policy
+    user: {id: cust-001}
+    args: {policy_number: POL-1002, loss_date: "2026-10-01", loss_type: theft, description: "Laptop stolen from home", estimated_amount: 60000}
+    expect: {status: error}
+  - tool: open_claim                    # not a covered peril
+    user: {id: cust-001}
+    args: {policy_number: POL-1001, loss_date: "2026-10-01", loss_type: earthquake, description: "Garage wall fell on the car", estimated_amount: 30000}
+    expect: {status: error}
+  - tool: open_claim
+    user: {id: cust-001}
+    args: {policy_number: POL-1001, loss_date: "2026-10-01", loss_type: collision, description: "Scraped a pillar while parking", estimated_amount: 18000}
+    expect: {status: ok, keys: [claim_id], equals: {status: registered}}
+  - tool: open_claim                    # above the approval limit
+    user: {id: cust-001}
+    args: {policy_number: POL-1001, loss_date: "2026-10-03", loss_type: flood, description: "Car submerged in basement parking", estimated_amount: 350000}
+    expect: {status: pending_approval}
+  - tool: upload_claim_document
+    user: {id: cust-001}
+    args: {claim_id: CLM-50001, filename: bumper.jpg, doc_type: photo, content_base64: "aGVsbG8gd29ybGQ="}
+    expect: {status: ok, keys: [document_id]}
+  - tool: upload_claim_document
+    user: {id: cust-001}
+    args: {claim_id: CLM-50001, filename: notes.exe, doc_type: photo, content_base64: "aGVsbG8="}
+    expect: {status: error}

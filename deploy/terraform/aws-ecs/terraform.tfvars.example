@@ -1,0 +1,27 @@
+region             = "<aws region, e.g. ap-south-1>"
+image              = "<account>.dkr.ecr.<region>.amazonaws.com/connector-hub:<tag>"
+vpc_id             = "<vpc-...>"
+alb_subnet_ids     = ["<private subnet-...>", "<private subnet-...>"]
+private_subnet_ids = ["<subnet-...>", "<subnet-...>"]
+certificate_arn    = "<arn:aws:acm:...>"
+allowed_cidrs      = ["<agent subnet CIDR, e.g. 10.20.0.0/16>"]
+environment = {
+  HUB_AUTH                = "oidc"
+  HUB_OIDC_ISSUER         = "<https://your-idp>"
+  HUB_OIDC_AUDIENCE       = "connector-hub"
+  HUB_PUBLIC_URL          = "<https://hub.internal.example>"
+  SALESFORCE_BACKEND      = "mcp"
+  SALESFORCE_MCP_URL      = "<the org's hosted MCP server URL>"
+  SALESFORCE_IDENTITY     = "token_exchange"
+  SALESFORCE_TOKEN_URL    = "<your IdP token endpoint>"
+  SALESFORCE_AUDIENCE     = "<audience Salesforce trusts>"
+  SAP_MCP_URL             = "<AWS for SAP MCP Server URL on AgentCore>"
+  SAP_IDENTITY            = "token_exchange"
+  SAP_TOKEN_URL           = "<your IdP token endpoint>"
+}
+secrets = {
+  HUB_STORE                = "<arn of a secret holding postgresql+psycopg://... (RDS / Aurora)>"
+  HUB_TOKEN_KEY            = "<arn:...:hub-token-key>"
+  SALESFORCE_CLIENT_SECRET = "<arn:...>"
+  SAP_CLIENT_SECRET        = "<arn:...>"
+}

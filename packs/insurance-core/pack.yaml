@@ -1,0 +1,25 @@
+name: insurance-core
+version: 0.1.0
+description: Policy and claims tools for a claims-intake agent, against a core insurance platform's REST API.
+# Template for systems without an MCP server: copy this pack, point the backend at your API, keep the tools typed.
+system: insurance_core
+backend: rest
+backends:
+  rest: backend:RestBackend
+settings:
+  base_url: "${INSURANCE_CORE_URL:-fake://insurance-core}"
+  max_document_mb: "${INSURANCE_MAX_DOCUMENT_MB:-2}"
+auth:
+  identity: "${INSURANCE_CORE_IDENTITY:-fake}"        # token_exchange | ema | service_account | fake
+  token_url: "${INSURANCE_CORE_TOKEN_URL:-}"
+  audience: "${INSURANCE_CORE_AUDIENCE:-}"
+  client_id_env: INSURANCE_CORE_CLIENT_ID
+  client_secret_env: INSURANCE_CORE_CLIENT_SECRET
+  scopes:
+    "*": [policy.read, claims.read]
+    open_claim: [policy.read, claims.write]
+    upload_claim_document: [claims.write]
+fakes:
+  insurance-core: mock_api.app:create_app
+validation:
+  rest: fixture_tested

@@ -1,0 +1,6 @@
+name: helpdesk-agent
+description: Employee IT helpdesk - ServiceNow incidents and requests.
+tools:
+  - servicenow-itsm:*
+rename:
+  "servicenow-itsm:list_my_incidents": my_incidents

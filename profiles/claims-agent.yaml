@@ -1,0 +1,7 @@
+name: claims-agent
+description: Insurance claims intake - policies, first notice of loss, documents; product warranties.
+tools:
+  - insurance-core:*
+  - warranty-api:getWarranty
+  - warranty-api:listWarrantyClaims
+tokenize_results: false

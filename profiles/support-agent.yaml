@@ -1,0 +1,10 @@
+# One MCP endpoint per agent: /mcp/support-agent. Only these tools are listed to the agent.
+name: support-agent
+description: B2B customer support - Salesforce cases plus SAP orders, deliveries and returns.
+tools:
+  - salesforce-service:*
+  - sap-s4-orders:*
+policies:
+  - tool: create_return_request
+    deny_if: "'support_agent' not in user.roles and 'sales_ops' not in user.roles and len(args.items) > 5"
+    message: "Customers can return up to 5 lines at a time through the agent; larger returns go through sales ops."

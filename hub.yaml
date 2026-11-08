@@ -1,0 +1,7 @@
+# connector-hub configuration. Environment-specific values come from the environment or .env (see .env.example).
+name: connector-hub
+packs_dir: packs
+profiles_dir: profiles
+packs: []            # empty = every pack in packs_dir
+store: "${HUB_STORE:-sqlite:///.hub/hub.db}"
+hooks: {}            # on_result / on_audit: "module:function" (e.g. the 5.5 DPDP hooks)

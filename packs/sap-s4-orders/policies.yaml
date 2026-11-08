@@ -1,0 +1,8 @@
+# The return value threshold depends on order data, so the tool itself holds large returns for approval
+# (settings.return_approval_limit). Policies here only see the arguments.
+policies:
+  - tool: create_return_request
+    deny_if: "len(args.items) > 20"
+    message: "A return can have at most 20 items; split it."
+  - tool: "*"
+    rate_limit: {per_user: "60/min"}

@@ -1,0 +1,58 @@
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request: {}
+permissions: {contents: read}
+concurrency: {group: "ci-${{ github.ref }}", cancel-in-progress: true}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: {python: ["3.11", "3.12", "3.13"]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "${{ matrix.python }}", cache: pip}
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest -q
+      - name: conformance (every pack, offline)
+        env: {HUB_STORE: "sqlite://"}
+        run: hub conformance
+      - name: dependency audit
+        if: matrix.python == '3.12'
+        run: pip freeze --exclude agent-connector-hub > /tmp/req.txt && pip-audit -r /tmp/req.txt --no-deps --disable-pip --progress-spinner off
+
+  starter-kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -e . "agent-starter-kit[openai,connectors] @ git+https://github.com/koushikmohanbhat/agent-starter-kit"
+      - name: a starter-kit agent binds and calls hub tools over MCP
+        run: python examples/kit_integration.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t connector-hub:ci .
+      - name: container serves governed tools
+        run: |
+          docker run -d -p 8080:8080 -e HUB_AUTH=api_key -e HUB_API_KEYS=k --name hub connector-hub:ci
+          for i in $(seq 1 30); do curl -sf localhost:8080/readyz && break; sleep 1; done
+          curl -sf localhost:8080/v1/call/claims-agent/get_policy -H 'X-API-Key: k' -H 'X-End-User-Id: cust-001' \
+            -H 'Content-Type: application/json' -d '{"arguments": {"policy_number": "POL-1001"}}' | grep -q '"active"'
+          docker run --rm -e HUB_ENV=prod -e HUB_AUTH=api_key -e HUB_API_KEYS=k connector-hub:ci hub check /app
+
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: {module: [aws-ecs, gcp-cloud-run]}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: deploy/terraform/${{ matrix.module }}
+        run: terraform fmt -check -diff && terraform init -backend=false && terraform validate

@@ -1,0 +1,18 @@
+calls:
+  - {tool: get_sales_order, user: {id: cust-001}, args: {order_id: "4500001"}, expect: {status: ok, keys: [items], equals: {delivery_status: complete}}}
+  - {tool: get_sales_order, user: {id: cust-001}, args: {order_id: "4500003"}, expect: {status: error}}
+  - {tool: get_sales_order, user: {id: ops-1, roles: [sales_ops]}, args: {order_id: "4500003"}, expect: {status: ok}}
+  - {tool: list_open_orders, user: {id: cust-001}, args: {}, expect: {status: ok, keys: [orders]}}
+  - {tool: get_delivery_status, user: {id: cust-001}, args: {order_id: "4500002"}, expect: {status: ok, keys: [deliveries]}}
+  - tool: create_return_request         # not delivered yet
+    user: {id: cust-001}
+    args: {order_id: "4500002", items: [{item: "10", quantity: 1}], reason: damaged}
+    expect: {status: error}
+  - tool: create_return_request         # 2 seal kits = 4,000 INR, under the limit
+    user: {id: cust-001}
+    args: {order_id: "4500001", items: [{item: "20", quantity: 2}], reason: damaged}
+    expect: {status: ok, keys: [return_id], equals: {value: 4000.0}}
+  - tool: create_return_request         # 4 pumps = 64,000 INR, above the 50,000 limit
+    user: {id: cust-001}
+    args: {order_id: "4500001", items: [{item: "10", quantity: 4}], reason: wrong_item}
+    expect: {status: pending_approval}

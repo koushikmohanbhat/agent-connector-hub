@@ -1,0 +1,11 @@
+calls:
+  - {tool: get_incident, user: {id: emp-001}, args: {number: INC0010001}, expect: {status: ok, equals: {state: In Progress}}}
+  - {tool: get_incident, user: {id: emp-001}, args: {number: INC0010002}, expect: {status: error}}
+  - {tool: get_incident, user: {id: it-9, roles: [itil]}, args: {number: INC0010002}, expect: {status: ok, equals: {priority: "2"}}}
+  - {tool: list_my_incidents, user: {id: emp-002}, args: {}, expect: {status: ok, keys: [incidents]}}
+  - {tool: get_request_status, user: {id: emp-001}, args: {number: REQ0020001}, expect: {status: ok, equals: {stage: fulfillment}}}
+  - {tool: get_request_status, user: {id: emp-002}, args: {number: REQ0020001}, expect: {status: error}}
+  - {tool: create_incident, user: {id: emp-002}, args: {short_description: "Printer on 3rd floor jams", urgency: 3, impact: 3}, expect: {status: ok, equals: {priority: "5"}}}
+  - {tool: create_incident, user: {id: emp-002}, args: {short_description: "Payments site is down", urgency: 1, impact: 1}, expect: {status: pending_approval}}
+  - {tool: add_work_note, user: {id: emp-001}, args: {number: INC0010001, note: "Happens on home Wi-Fi too"}, expect: {status: ok}}
+  - {tool: add_work_note, user: {id: emp-001}, args: {number: INC0010002, note: "not mine"}, expect: {status: error}}

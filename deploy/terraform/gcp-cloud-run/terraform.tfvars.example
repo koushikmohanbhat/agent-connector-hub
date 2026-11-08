@@ -1,0 +1,21 @@
+project = "<gcp project id>"
+region  = "<region, e.g. asia-south1>"
+image   = "<region>-docker.pkg.dev/<project>/<repo>/connector-hub:<tag>"
+invokers = ["serviceAccount:<agent service account email>"]
+environment = {
+  HUB_AUTH                 = "oidc"
+  HUB_OIDC_ISSUER          = "<https://your-idp>"
+  HUB_OIDC_AUDIENCE        = "connector-hub"
+  SERVICENOW_BACKEND       = "mcp"
+  SERVICENOW_MCP_URL       = "<https://<instance>.service-now.com/sncapps/mcp-server/mcp/<server>>"
+  SERVICENOW_IDENTITY      = "service_account"
+  SERVICENOW_TOKEN_URL     = "<https://<instance>.service-now.com/oauth_token.do>"
+  INSURANCE_CORE_URL       = "<https://policy-admin.internal>"
+  INSURANCE_CORE_IDENTITY  = "token_exchange"
+  INSURANCE_CORE_TOKEN_URL = "<your IdP token endpoint>"
+}
+secrets = {
+  HUB_STORE                = "<secret id holding postgresql+psycopg://... (Cloud SQL / AlloyDB)>"
+  HUB_TOKEN_KEY            = "<secret id>"
+  SERVICENOW_CLIENT_SECRET = "<secret id>"
+}

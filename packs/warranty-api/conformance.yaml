@@ -1,0 +1,19 @@
+calls:
+- tool: getWarranty
+  args:
+    serial: SN-778812
+  expect:
+    status: ok
+- tool: listWarrantyClaims
+  args:
+    serial: SN-778812
+  expect:
+    status: ok
+- tool: createWarrantyClaim
+  args:
+    serial: SN-778812
+    body:
+      fault: Drum makes a grinding noise
+      preferred_date: '2026-11-12'
+  expect:
+    status: pending_approval
