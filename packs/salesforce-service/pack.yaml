@@ -1,0 +1,36 @@
+name: salesforce-service
+version: 0.1.0
+description: Service Cloud for a support agent - find accounts, read and open cases, add comments, change status.
+system: salesforce
+# mcp: the org's Salesforce hosted MCP server (default). rest: the REST API, for orgs that have not enabled it.
+backend: "${SALESFORCE_BACKEND:-mcp}"
+backends:
+  mcp: backend:McpBackend
+  rest: backend:RestBackend
+settings:
+  mcp_url: "${SALESFORCE_MCP_URL:-fake://salesforce-mcp}"
+  instance_url: "${SALESFORCE_INSTANCE_URL:-fake://salesforce}"
+  api_version: "${SALESFORCE_API_VERSION:-v64.0}"
+  # Names of the upstream MCP tools for querying and writing records. Hosted servers vary by configuration:
+  # run `hub upstream salesforce-service` against your org and set these to match.
+  mcp_query_tool: "${SALESFORCE_MCP_QUERY_TOOL:-soql_query}"
+  mcp_create_tool: "${SALESFORCE_MCP_CREATE_TOOL:-create_record}"
+  mcp_update_tool: "${SALESFORCE_MCP_UPDATE_TOOL:-update_record}"
+auth:
+  # Salesforce applies each user's object, field and sharing permissions, so act as the user.
+  identity: "${SALESFORCE_IDENTITY:-fake}"           # token_exchange | ema | user_oauth | fake
+  token_url: "${SALESFORCE_TOKEN_URL:-}"
+  audience: "${SALESFORCE_AUDIENCE:-}"
+  resource: "${SALESFORCE_MCP_URL:-}"
+  downstream_token_url: "${SALESFORCE_DOWNSTREAM_TOKEN_URL:-}"
+  authorize_url: "${SALESFORCE_AUTHORIZE_URL:-}"
+  client_id_env: SALESFORCE_CLIENT_ID
+  client_secret_env: SALESFORCE_CLIENT_SECRET
+  scopes:
+    "*": [api, refresh_token]
+fakes:
+  salesforce: connector_hub.emulators.salesforce:rest_app
+  salesforce-mcp: connector_hub.emulators.salesforce:mcp_app
+validation:
+  mcp: fixture_tested
+  rest: fixture_tested

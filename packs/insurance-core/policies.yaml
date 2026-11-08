@@ -1,0 +1,10 @@
+policies:
+  - tool: open_claim
+    require_approval_if: "args.estimated_amount > ${CLAIM_APPROVAL_LIMIT:-100000}"
+    approver_role: claims_supervisor
+    message: "Claims estimated above the limit need a claims supervisor before they are registered."
+  - tool: upload_claim_document
+    deny_if: "lower(args.doc_type) not in ['photo', 'invoice', 'police_report', 'estimate', 'medical_report']"
+    message: "Unsupported document type."
+  - tool: "*"
+    rate_limit: {per_user: "30/min"}

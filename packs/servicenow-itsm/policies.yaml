@@ -1,0 +1,7 @@
+policies:
+  - tool: create_incident
+    require_approval_if: "args.impact == 1 and args.urgency == 1"
+    approver_role: service_desk_lead
+    message: "A priority 1 incident pages the on-call team; a service desk lead must confirm it."
+  - tool: "*"
+    rate_limit: {per_user: "60/min"}

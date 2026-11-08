@@ -1,0 +1,58 @@
+openapi: 3.0.3
+info:
+  title: Warranty API (example)
+  version: 1.0.0
+  description: An example OpenAPI service used to show `hub generate openapi`.
+paths:
+  /warranties/{serial}:
+    get:
+      operationId: getWarranty
+      summary: Look up the warranty for a product serial number.
+      parameters:
+        - {name: serial, in: path, required: true, schema: {type: string, pattern: "^[A-Z0-9-]{6,20}$"}, description: Product serial number, example: SN-778812}
+      responses:
+        "200":
+          description: The warranty
+          content:
+            application/json:
+              example: {serial: SN-778812, product: "Washing machine WM-8", status: active, expires: "2028-03-31", plan: extended}
+        "404": {description: Not found}
+  /warranties/{serial}/claims:
+    get:
+      operationId: listWarrantyClaims
+      summary: List repair claims for a serial number.
+      parameters:
+        - {name: serial, in: path, required: true, schema: {type: string}, example: SN-778812}
+        - {name: status, in: query, required: false, schema: {type: string, enum: [open, closed]}}
+      responses:
+        "200":
+          description: Claims
+          content:
+            application/json:
+              example: {claims: [{claim: WC-1001, opened: "2026-09-02", status: closed, fault: "drum noise"}]}
+    post:
+      operationId: createWarrantyClaim
+      summary: Book a repair under warranty.
+      parameters:
+        - {name: serial, in: path, required: true, schema: {type: string}, example: SN-778812}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example: {fault: "Drum makes a grinding noise", preferred_date: "2026-11-12"}
+            schema:
+              $ref: "#/components/schemas/NewClaim"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              example: {claim: WC-1002, status: open, visit_window: "2026-11-12 10:00-14:00"}
+components:
+  schemas:
+    NewClaim:
+      type: object
+      required: [fault, preferred_date]
+      properties:
+        fault: {type: string, maxLength: 500}
+        preferred_date: {type: string, format: date}

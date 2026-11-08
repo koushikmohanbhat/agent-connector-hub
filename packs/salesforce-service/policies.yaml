@@ -1,0 +1,10 @@
+policies:
+  - tool: update_case_status
+    require_approval_if: "args.status == 'Closed'"
+    approver_role: support_lead
+    message: "Closing a customer's case needs a support lead."
+  - tool: add_case_comment
+    deny_if: "args.public and len(args.comment) > 2000"
+    message: "Public comments are limited to 2,000 characters."
+  - tool: "*"
+    rate_limit: {per_user: "60/min"}

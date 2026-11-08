@@ -1,0 +1,21 @@
+# Expected outcomes against the fakes. `hub conformance salesforce-service` runs these on every backend.
+calls:
+  - {tool: find_account, user: {id: cust-001}, args: {name: Asha}, expect: {status: ok, keys: [accounts]}}
+  - tool: find_account          # another customer's account is invisible (Salesforce sharing)
+    user: {id: cust-001}
+    args: {name: Bharat}
+    expect: {status: ok, equals: {accounts: []}}
+  - {tool: get_case, user: {id: cust-001}, args: {case_number: "00001001"}, expect: {status: ok, keys: [comments], equals: {status: Working}}}
+  - {tool: get_case, user: {id: cust-001}, args: {case_number: "00001002"}, expect: {status: error}}
+  - {tool: get_case, user: {id: agent-7, roles: [support_agent]}, args: {case_number: "00001002"}, expect: {status: ok, equals: {priority: High}}}
+  - tool: create_case
+    user: {id: cust-001}
+    args: {account_id: "001A00000000002", subject: "Not my account", description: "x"}
+    expect: {status: error}
+  - tool: create_case
+    user: {id: cust-001}
+    args: {account_id: "001A00000000001", subject: "Invoice copy", description: "Need a copy of October's invoice", priority: Low}
+    expect: {status: ok, keys: [case_number], equals: {status: New}}
+  - {tool: add_case_comment, user: {id: cust-001}, args: {case_number: "00001001", comment: "Customer called again"}, expect: {status: ok}}
+  - {tool: update_case_status, user: {id: cust-001}, args: {case_number: "00001001", status: Escalated}, expect: {status: ok}}
+  - {tool: update_case_status, user: {id: cust-001}, args: {case_number: "00001001", status: Closed}, expect: {status: pending_approval}}

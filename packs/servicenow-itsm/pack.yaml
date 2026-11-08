@@ -1,0 +1,35 @@
+name: servicenow-itsm
+version: 0.1.0
+description: IT service management for an employee helpdesk agent - incidents, work notes and request status.
+system: servicenow
+# mcp: the instance's MCP server (default). rest: the Table API, for instances without it.
+backend: "${SERVICENOW_BACKEND:-mcp}"
+backends:
+  mcp: backend:McpBackend
+  rest: backend:RestBackend
+settings:
+  mcp_url: "${SERVICENOW_MCP_URL:-fake://servicenow-mcp}"
+  instance_url: "${SERVICENOW_INSTANCE_URL:-fake://servicenow}"
+  # Tool names on the instance's MCP server (configured by its admin). Check with `hub upstream servicenow-itsm`.
+  mcp_read_tool: "${SERVICENOW_MCP_READ_TOOL:-get_records}"
+  mcp_create_tool: "${SERVICENOW_MCP_CREATE_TOOL:-create_record}"
+  mcp_update_tool: "${SERVICENOW_MCP_UPDATE_TOOL:-update_record}"
+  user_field: "${SERVICENOW_USER_FIELD:-caller_id}"     # how the end user is matched on incidents
+auth:
+  # ServiceNow recommends a service account for integrations. The pack then filters every read and write to the
+  # end user's own records (unless they have the itil role) and the audit log records who it acted for.
+  identity: "${SERVICENOW_IDENTITY:-fake}"            # service_account | token_exchange | user_oauth | fake
+  token_url: "${SERVICENOW_TOKEN_URL:-}"               # e.g. https://<instance>.service-now.com/oauth_token.do
+  audience: "${SERVICENOW_AUDIENCE:-}"
+  authorize_url: "${SERVICENOW_AUTHORIZE_URL:-}"
+  client_id_env: SERVICENOW_CLIENT_ID
+  client_secret_env: SERVICENOW_CLIENT_SECRET
+  user_filter: "caller_id / requested_for = the end user, unless the user has the itil role"
+  scopes:
+    "*": [useraccount]
+fakes:
+  servicenow: connector_hub.emulators.servicenow:rest_app
+  servicenow-mcp: connector_hub.emulators.servicenow:mcp_app
+validation:
+  mcp: fixture_tested
+  rest: fixture_tested

@@ -1,0 +1,5 @@
+policies:
+- tool: createWarrantyClaim
+  require_approval_if: 'True'
+  approver_role: approver
+  message: createWarrantyClaim changes warranty; review before enabling without approval

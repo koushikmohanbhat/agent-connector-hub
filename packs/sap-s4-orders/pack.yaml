@@ -1,0 +1,45 @@
+name: sap-s4-orders
+version: 0.1.0
+description: SAP S/4HANA sales orders for a B2B customer-service agent - orders, deliveries and customer returns.
+system: sap
+# Proxies the AWS for SAP MCP Server (GA on Amazon Bedrock AgentCore since May 2026), which exposes generic
+# OData tools. AWS only: on other clouds or on-prem this pack runs against its fake until a direct OData backend lands.
+backend: mcp
+backends:
+  mcp: backend:AwsSapMcpBackend
+settings:
+  mcp_url: "${SAP_MCP_URL:-fake://aws-sap-mcp}"
+  # Tool and argument names on the AWS for SAP MCP Server. Check with `hub upstream sap-s4-orders` and adjust.
+  read_tool: "${SAP_MCP_READ_TOOL:-odata_read}"
+  create_tool: "${SAP_MCP_CREATE_TOOL:-odata_create}"
+  tool_args:
+    service: service
+    entity_set: entity_set
+    key: key
+    filter: filter
+    select: select
+    top: top
+    payload: payload
+  customer_claim: "${SAP_CUSTOMER_CLAIM:-sap_customer}"   # the user's sold-to party, from the IdP token
+  return_type: "${SAP_RETURN_TYPE:-CBRE}"
+  return_approval_limit: "${SAP_RETURN_APPROVAL_LIMIT:-50000}"
+  reason_codes:
+    damaged: "${SAP_REASON_DAMAGED:-101}"
+    wrong_item: "${SAP_REASON_WRONG_ITEM:-102}"
+    not_needed: "${SAP_REASON_NOT_NEEDED:-103}"
+auth:
+  # The AWS for SAP MCP Server sits behind AgentCore inbound auth (your IdP). With principal propagation SAP applies
+  # the user's own authorisations; with a technical user the pack checks the sold-to party against the user's claim.
+  identity: "${SAP_IDENTITY:-fake}"                   # token_exchange | service_account | fake
+  token_url: "${SAP_TOKEN_URL:-}"
+  audience: "${SAP_AUDIENCE:-}"
+  client_id_env: SAP_CLIENT_ID
+  client_secret_env: SAP_CLIENT_SECRET
+  user_filter: "SoldToParty must equal the user's sap_customer claim, unless the user has the sales_ops role"
+  scopes:
+    "*": [sap.sales.read]
+    create_return_request: [sap.sales.read, sap.returns.write]
+fakes:
+  aws-sap-mcp: connector_hub.emulators.sap:mcp_app
+validation:
+  mcp: fixture_tested
