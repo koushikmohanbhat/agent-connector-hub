@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix: {python: ["3.11", "3.12", "3.13"]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "${{ matrix.python }}", cache: pip}
       - run: pip install -e ".[dev]"
@@ -27,7 +27,7 @@ jobs:
   starter-kit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12", cache: pip}
       - run: pip install -e . "agent-starter-kit[openai,connectors] @ git+https://github.com/koushikmohanbhat/agent-starter-kit"
@@ -37,7 +37,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build -t connector-hub:ci .
       - name: container serves governed tools
         run: |
@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix: {module: [aws-ecs, gcp-cloud-run]}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: hashicorp/setup-terraform@v3
       - working-directory: deploy/terraform/${{ matrix.module }}
         run: terraform fmt -check -diff && terraform init -backend=false && terraform validate
