@@ -12,7 +12,7 @@ jobs:
       matrix: {python: ["3.11", "3.12", "3.13"]}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "${{ matrix.python }}", cache: pip}
       - run: pip install -e ".[dev]"
       - run: ruff check .
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "3.12", cache: pip}
       - run: pip install -e . "agent-starter-kit[openai,connectors] @ git+https://github.com/koushikmohanbhat/agent-starter-kit"
       - name: a starter-kit agent binds and calls hub tools over MCP
