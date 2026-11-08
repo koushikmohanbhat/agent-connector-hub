@@ -53,6 +53,6 @@ jobs:
       matrix: {module: [aws-ecs, gcp-cloud-run]}
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
       - working-directory: deploy/terraform/${{ matrix.module }}
         run: terraform fmt -check -diff && terraform init -backend=false && terraform validate
